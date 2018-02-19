@@ -36,11 +36,12 @@ after_script:
 
 # run the script to upload the build to ftp
 after_success:
- - cd $(pwd)/Builds/WebGL/ && find * -type f -exec curl --ftp-create-dirs -T {} -u $ftpuser:$ftppassword ftp://$ftpurl/{project}/{} \;
+ - cd $(pwd)/Builds/WebGL/ && find * -type f -exec curl --ftp-create-dirs -T {} -u $ftpuser:$ftppassword ftp://$ftpurl/$project/{} \;
 
 # environment variables used in bash scripts
 env:
   global:
+   - project="project"
     # Use travis cli to generate secure variables
    - secure: #$ftpuser
    - secure: #$ftppassword
