@@ -1,0 +1,47 @@
+# do not install anything extra onto the image
+language: generic
+
+# use a Mac OSX image
+os: osx
+osx_image: xcode8.3
+
+# only run builds on pushes to the master branch
+branches:
+  only:
+  - master
+
+# send email notifications when the build changes from succeeding to broken
+notifications:
+  email:
+    on_success: never
+    on_failure: change
+
+before_install:
+  # To fix issue with shell_session_update
+  - command curl -sSL https://rvm.io/mpapis.asc | gpg --import -
+  - rvm get head
+
+# run the script to download and install Unity editor
+install:
+  - sudo -E sh ./Scripts/install.sh
+
+# run the script for builds
+# travis_wait 20 is ues to not timeout after 10 minutes
+script:
+  - travis_wait 20 sudo -E sh ./Scripts/build.sh
+
+# workaround to not truncate logs
+after_script:
+  - sleep 5
+
+# run the script to upload the build to ftp
+after_success:
+ - cd $(pwd)/Builds/WebGL/ && find * -type f -exec curl --ftp-create-dirs -T {} -u $ftpuser:$ftppassword ftp://$ftpurl/{project}/{} \;
+
+# environment variables used in bash scripts
+env:
+  global:
+    # Use travis cli to generate secure variables
+   - secure: #$ftpuser
+   - secure: #$ftppassword
+   - secure: #$ftpurl
